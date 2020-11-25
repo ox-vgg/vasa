@@ -7,14 +7,11 @@ which allows it to be useful for both academic projects and commercial applicati
 
 More details are available at: http://www.robots.ox.ac.uk/~vgg/software/vasa/
 
-## Screenshots
-Coming soon !
-
 ## Download
-Detailed instructions for downloading the VASA software is available at http://www.robots.ox.ac.uk/~vgg/software/vasa/
+Detailed instructions for downloading the VASA software is available at http://www.robots.ox.ac.uk/~vgg/software/vasa/#downloads
 
 ## Demo
-A sample demo package can be downloaded at http://www.robots.ox.ac.uk/~vgg/software/vasa/
+Usage examples are described at http://www.robots.ox.ac.uk/~vgg/software/vasa/#Examples, and sample demo packages can be downloaded from http://www.robots.ox.ac.uk/~vgg/software/vasa/#downloads
 
 ## Developer's Resources
 VASA was created on top of the [VGG Image Annotator (VIA) v2](http://www.robots.ox.ac.uk/~vgg/software/via/) tool. For more information on extending or creating VIA, see: https://gitlab.com/vgg/via/#developers-resources.
