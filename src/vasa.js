@@ -54,7 +54,7 @@
 
 "use strict";
 
-var VIA_VERSION      = '0.0.1';
+var VIA_VERSION      = '1.0.0';
 var VIA_NAME         = 'VGG Annotation Search and Annotator';
 var VIA_SHORT_NAME   = 'VASA';
 var VIA_REGION_SHAPE = { RECT:'rect',
@@ -194,6 +194,9 @@ var _via_message_clear_timer;
 
 // VIA mode
 var _via_current_mode = VIA_MODE_NAME.ANNOTATION;
+var _via_search_last_display_area_content_name  = null;
+var _via_search_last_loaded_image_index         = -1;
+var _via_annotation_last_loaded_image_index     = -1;
 
 // image_search
 var _via_search_results_load_ongoing            = false;
@@ -206,10 +209,10 @@ var _via_search_results_page_last_index         = -1;
 var _via_search_results_stack_prev_page         = []; // stack of first img index of every page navigated so far
 var _via_search_results_page_img_index_list     = []; // list of all image index in current page of search results
 var _via_search_results_visible_img_index_list  = []; // list of images currently visible in search results
-var _via_wordcloud_words                        = [];
 
 // word cloud
 var _via_word_cloud_color = "#0000ff";
+var _via_word_cloud_words  = [];
 
 // attributes
 var _via_attribute_being_updated       = 'region'; // {region, file}
@@ -512,11 +515,15 @@ function is_content_name_valid(content_name) {
 function via_mode_toggle() {
   if (_via_current_mode == VIA_MODE_NAME.SEARCH) {
     ///// change to annotation mode
+    _via_search_last_display_area_content_name = _via_display_area_content_name;
+    _via_search_last_loaded_image_index = _via_image_index;
     clear_display_area();
     // hide components that are exclusive to the other mode
     var menu = document.getElementById('search_menu_project');
     menu.classList.add('display_none');
     menu = document.getElementById('search_menu_annotation');
+    menu.classList.add('display_none');
+    menu = document.getElementById('search_menu_view');
     menu.classList.add('display_none');
     var toolbar = document.getElementById('search_toolbar');
     toolbar.classList.add('display_none');
@@ -535,10 +542,15 @@ function via_mode_toggle() {
     toolbar.classList.remove('display_none');
     _via_current_mode = VIA_MODE_NAME.ANNOTATION;
     _via_canvas_zoom_level_index   = VIA_CANVAS_DEFAULT_ZOOM_LEVEL_INDEX;
+    if (_via_annotation_last_loaded_image_index > -1) {
+         img_fn_list_clear_all_style();
+        _via_image_index = _via_annotation_last_loaded_image_index;
+    }
     show_single_image_view();
   }
   else {
     ///// change to search mode
+    _via_annotation_last_loaded_image_index = _via_image_index;
     clear_display_area();
     // hide components that are exclusive to the other mode
     if (is_annotation_editor_visible()) {
@@ -559,6 +571,8 @@ function via_mode_toggle() {
     menu.classList.remove('display_none');
     menu = document.getElementById('search_menu_annotation');
     menu.classList.remove('display_none');
+    menu = document.getElementById('search_menu_view');
+    menu.classList.remove('display_none');
     toolbar = document.getElementById('search_toolbar');
     toolbar.classList.remove('display_none');
     panel = document.getElementById('search_results_panel');
@@ -566,7 +580,21 @@ function via_mode_toggle() {
     _via_current_mode = VIA_MODE_NAME.SEARCH;
     _via_canvas_zoom_level_index   = VIA_CANVAS_DEFAULT_ZOOM_LEVEL_INDEX;
     if (_via_img_count > 0) {
-        show_search_bar();
+        if (_via_search_last_display_area_content_name === null ||
+            _via_search_last_display_area_content_name === VIA_DISPLAY_AREA_CONTENT_NAME.SEARCH_PANEL) {
+            toolbar = document.getElementById('search_toolbar');
+            toolbar.classList.remove('display_none');
+            panel = document.getElementById('search_results_panel');
+            panel.classList.remove('display_none');
+            _via_search_last_display_area_content_name = VIA_DISPLAY_AREA_CONTENT_NAME.SEARCH_PANEL;
+            show_search_bar();
+        } else {
+          if (_via_search_last_loaded_image_index > -1) {
+            img_fn_list_clear_all_style();
+            _via_show_img(_via_search_last_loaded_image_index);
+          }
+          set_display_area_content(VIA_DISPLAY_AREA_CONTENT_NAME.IMAGE);
+        }
     }
     else {
         set_display_area_content(VIA_DISPLAY_AREA_CONTENT_NAME.PAGE_START_INFO);
@@ -575,10 +603,6 @@ function via_mode_toggle() {
   var p = document.getElementById('toolbar_via_mode_toggle');
   p.innerHTML =  _via_current_mode + ' mode';
 }
-
-/*function show_home_panel() {
-  show_single_image_view();
-}*/
 
 function set_display_area_content(content_name) {
   if ( is_content_name_valid(content_name) ) {
@@ -2962,8 +2986,7 @@ function _via_redraw_reg_canvas() {
       if (_via_is_region_boundary_visible) {
         draw_all_regions();
       }
-      if (_via_is_region_id_visible && // Don't draw region IDs on Search mode
-          _via_current_mode === VIA_MODE_NAME.ANNOTATION) {
+      if (_via_is_region_id_visible) {
         draw_all_region_id();
       }
     }
@@ -4866,10 +4889,6 @@ function zoom_out() {
 
 function toggle_region_boundary_visibility() {
 
-  if (_via_current_mode != VIA_MODE_NAME.ANNOTATION) {
-    return;
-  }
-
   if ( _via_display_area_content_name === VIA_DISPLAY_AREA_CONTENT_NAME.IMAGE ) {
     _via_is_region_boundary_visible = !_via_is_region_boundary_visible;
     _via_redraw_reg_canvas();
@@ -4888,10 +4907,6 @@ function toggle_region_boundary_visibility() {
 }
 
 function toggle_region_id_visibility() {
-
-  if (_via_current_mode != VIA_MODE_NAME.ANNOTATION) {
-    return;
-  }
 
   _via_is_region_id_visible = !_via_is_region_id_visible;
   _via_redraw_reg_canvas();
@@ -7495,7 +7510,9 @@ function project_open_parse_json_file(project_file_data) {
         update_img_fn_list();
       }
       else {
-        update_img_fn_list()
+        clear_display_area();
+        update_img_fn_list();
+        clear_search_and_cloud(true);
         show_search_bar();
       }
       _via_reload_img_fn_list_table = true;
@@ -9385,11 +9402,11 @@ function show_search_bar() {
 
     _via_search_results_group_var = [];
     _via_search_results_group_var.push( { 'type':_via_settings.ui.search_results.attribute_category, 'name':_via_settings.ui.search_results.attribute_name, 'current_value_index':0, 'values':new_group_values, 'group_index':0 } );
-    _via_wordcloud_words = []
+    _via_word_cloud_words = []
     var availableVals = [];
     for( var label_val in  _via_search_results_group ) {
       availableVals.push(label_val);
-      _via_wordcloud_words.push( { text: label_val, weight: _via_search_results_group[label_val].length,
+      _via_word_cloud_words.push( { text: label_val, weight: _via_search_results_group[label_val].length,
                     html: {style: 'cursor: pointer;'},
                     handlers: {
                         click: function() {
@@ -9408,7 +9425,7 @@ function show_search_bar() {
     });
 
     $('#wordcloud').jQCloud('destroy');
-    $('#wordcloud').jQCloud(_via_wordcloud_words, {
+    $('#wordcloud').jQCloud(_via_word_cloud_words, {
       removeOverflowing: true,
       autoResize: true,
       width: parseInt(window.innerWidth/2),

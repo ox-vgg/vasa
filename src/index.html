@@ -51,7 +51,7 @@
                                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
                               })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
       ga('create', 'UA-84656248-1', 'auto');
-      ga('set', 'page', 'vasa-0.0.1.html');
+      ga('set', 'page', 'vasa-1.0.0.html');
       ga('send', 'pageview');
     </script>
 
@@ -287,6 +287,13 @@
               <li onclick="toggle_region_boundary_visibility()" title="Show or hide the region boundaries">Show/hide region boundaries (b)</li>
               <li onclick="toggle_region_id_visibility()" title="Show or hide the region id labels">Show/hide region labels (l)</li>
               <li onclick="toggle_region_info_visibility()" title="Show or hide the image coordinates">Show/hide region info.</li>
+            </ul>
+          </li>
+
+          <li id="search_menu_view">View
+            <ul>
+              <li onclick="toggle_region_boundary_visibility()" title="Show or hide the region boundaries">Show/hide region boundaries (b)</li>
+              <li onclick="toggle_region_id_visibility()" title="Show or hide the region id labels">Show/hide region labels (l)</li>
             </ul>
           </li>
 
@@ -723,7 +730,7 @@
         </div> <!-- end of file not found panel -->
 
         <div id="page_start_info" class="display_area_content display_none narrow_page_content">
-          <p>This application allows you to search images by their annotation (<strong>Search mode</strong>) and to annotate images (<strong>Annotation mode</strong>). Click on the rigth top-corner button to toogle between modes.</p>
+          <p>This application allows you to search images by their annotation (<strong>Search mode</strong>) and to annotate images (<strong>Annotation mode</strong>). Click on the left top-corner button to toggle between modes.</p>
           <p>In <strong>Search mode</strong>:<p>
           <ul>
             <li>To be able to search, <span class="text_button" title="Load Project" onclick="project_open_select_project_file()">load a project</span> or import annotations (e.g. <span class="text_button" title="Import annotations from a CSV file" onclick="sel_local_data_file('annotations')">from a CSV file</span>). A search bar and a word cloud should show up automatically.</li>
@@ -744,13 +751,13 @@
         </div>
 
         <div id="page_getting_started" class="display_area_content display_none narrow_page_content">
-          <p>This application allows you to search images by their annotation (<strong>Search mode</strong>) and to annotate images (<strong>Annotation mode</strong>). Click on the rigth top-corner button to toogle between modes.</p>
+          <p>This application allows you to search images by their annotation (<strong>Search mode</strong>) and to annotate images (<strong>Annotation mode</strong>). Click on the left top-corner button to toggle between modes.</p>
           <p>In <strong>Search mode</strong>:<p>
           <ul>
             <li>To be able to search, <span class="text_button" title="Load Project" onclick="project_open_select_project_file()">load a project</span> or import annotations (e.g. <span class="text_button" title="Import annotations from a CSV file" onclick="sel_local_data_file('annotations')">from a CSV file</span>). A search bar and a word cloud should show up automatically.</li>
             <li>If the search bar and word cloud do not show up, you might need to change either the "Attribute name for Search Mode" or the "Attribute category for Search Mode" in the <span class="text_button" title="Settings" onclick="set_display_area_content(VIA_DISPLAY_AREA_CONTENT_NAME.SETTINGS)">Settings</span>. Be sure to read the description of each setting. After saving your changes the search bar should show up.</li>
             <li>Start typing on the search bar to be shown suggestions for a search query. The suggestions will only include words already present in text annotations within the current project.</li>
-            <li>Select a suggestion to retrieve the images associated with it.</li>
+            <li>Select a suggestion and then press the Search button to retrieve the images associated with the selected text.</li>
             <li>Alternatively, click on a word from the word cloud to retrieve the images associated with it.</li>
           </ul>
           <p>In <strong>Annotation mode</strong>:<p>
